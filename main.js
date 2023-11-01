@@ -14,7 +14,7 @@ if(localStorage.getItem('bestBrain')) {
     for(let i = 0; i < cars.length; i++) {
         cars[i].brain = JSON.parse(localStorage.getItem('bestBrain'));
         if(i != 0) {
-            NeuralNetwork.mutate(cars[i].brain, 0.1);
+            NeuralNetwork.mutate(cars[i].brain, 0.15);
         }
     }
 }
@@ -54,7 +54,8 @@ function animate(time) {
     }
 
     for(let i = 0; i < cars.length; i++) {
-        cars[i].update(road.borders, traffic);
+        let deviation = Math.abs(cars[i].y - bestCar.y);
+        cars[i].update(road.borders, traffic, deviation);
     }
 
     bestCar = cars.find(

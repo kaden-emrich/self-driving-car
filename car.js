@@ -13,6 +13,8 @@ class Car {
         this.damaged = false;
 
         this.useBrain = controlType == "AI";
+        this.maxDeviation = 200;
+        this.deviation = 0;
 
         if(controlType != "DUMMY") {
             this.sensor = new Sensor(this);
@@ -39,11 +41,12 @@ class Car {
         };
     }
 
-    update(roadBorders, traffic) {
+    update(roadBorders, traffic, deviation = 0) {
+        this.deviation = deviation;
         if(!this.damaged){
             this.#move();
             this.polygon = this.#createPolygon();
-            this.damaged = this.#assessDamage(roadBorders, traffic);
+            this.damaged = this.#assessDamage(roadBorders, traffic, deviation);
         }
         if(this.sensor) {
             this.sensor.update(roadBorders, traffic);
@@ -59,7 +62,10 @@ class Car {
         }
     }
 
-    #assessDamage(roadBorders, traffic) {
+    #assessDamage(roadBorders, traffic, deviation = 0) {
+        if(deviation >= this.maxDeviation) {
+            return true;
+        }
         for(let i = 0; i < roadBorders.length; i++) {
             if(polysIntersect(this.polygon, roadBorders[i])) {
                 return true;

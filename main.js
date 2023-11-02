@@ -87,6 +87,11 @@ function newGeneration() {
     ];
 }
 
+function nextGeneration() {
+    save();
+    newGeneration();
+}
+
 function animate(time) {
     for(let i = 0; i < traffic.length; i++) {
         traffic[i].update(road.borders, []);
@@ -140,7 +145,6 @@ function animate(time) {
     deadlyLaserY -= DEADLYLASERSPEED;
 
     if(liveCars < 1) {
-        save();
-        newGeneration();
+        nextGeneration();
     }
 }

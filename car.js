@@ -16,8 +16,6 @@ class Car {
         this.maxDeviation = 200;
         this.deviation = 0;
 
-        this.trafficScore = 0;
-
         if(controlType != "DUMMY") {
             this.sensor = new Sensor(this);
             this.brain = new NeuralNetwork([this.sensor.rayCount, 6, 4]);

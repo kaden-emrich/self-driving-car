@@ -14,7 +14,7 @@ var drawAmount = 100;
 
 const TRAFFIC_SPEED = 0;
 
-const N = 500;
+var N = 500;
 var cars = generateCars(N);
 let bestCar = cars[0];
 if(localStorage.getItem('bestBrain')) {

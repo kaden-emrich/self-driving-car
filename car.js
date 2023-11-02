@@ -41,12 +41,11 @@ class Car {
         };
     }
 
-    update(roadBorders, traffic, deviation = 0) {
-        this.deviation = deviation;
+    update(roadBorders, traffic, deadlyLaser) {
         if(!this.damaged){
             this.#move();
             this.polygon = this.#createPolygon();
-            this.damaged = this.#assessDamage(roadBorders, traffic, deviation);
+            this.damaged = this.#assessDamage(roadBorders, traffic, deadlyLaser);
         }
         if(this.sensor) {
             this.sensor.update(roadBorders, traffic);
@@ -62,10 +61,7 @@ class Car {
         }
     }
 
-    #assessDamage(roadBorders, traffic, deviation = 0) {
-        if(deviation >= this.maxDeviation) {
-            return true;
-        }
+    #assessDamage(roadBorders, traffic, deadlyLaser) {
         for(let i = 0; i < roadBorders.length; i++) {
             if(polysIntersect(this.polygon, roadBorders[i])) {
                 return true;
@@ -76,6 +72,11 @@ class Car {
                 return true;
             }
         }
+
+        if(deadlyLaser && polysIntersect(this.polygon, deadlyLaser)) {
+            return true;
+        }
+    
         return false;
     }
 

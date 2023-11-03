@@ -14,9 +14,11 @@ var deadlyLaserY = 300;
 
 var drawAmount = 20;
 
+var stopAnimaion = false;
+
 const TRAFFIC_SPEED = 0;
 
-var N = 500;
+var N = 200;
 var cars = generateCars(N);
 let bestCar = cars[0];
 if(localStorage.getItem('bestBrain')) {
@@ -66,7 +68,7 @@ function generateCars(n) {
     return cars;
 }
 
-function newGeneration() {
+async function newGeneration() {
     deadlyLaserY = 300;
     cars = generateCars(N);
     bestCar = cars[0];
@@ -87,11 +89,56 @@ function newGeneration() {
         new Car(road.getLaneCenter(1), -700, 30, 50, "DUMMY", TRAFFIC_SPEED, getRandomColor()),
         new Car(road.getLaneCenter(2), -700, 30, 50, "DUMMY", TRAFFIC_SPEED, getRandomColor())
     ];
+
+    return;
 }
 
-function nextGeneration() {
+async function nextGeneration() {
     save();
-    newGeneration();
+    await newGeneration();
+    return;
+}
+
+async function quickTrain(gens) {
+
+    stopAnimaion = true;
+
+    let numGens = 0;
+
+    while(numGens < gens) {
+        for(let i = 0; i < traffic.length; i++) {
+            traffic[i].update(road.borders, []);
+        }
+
+        let liveCars = 0;
+        for(let i = 0; i < cars.length; i++) {
+            let deviation = Math.abs(cars[i].y - bestCar.y);
+            cars[i].update(road.borders, traffic, [{ x: 0, y: deadlyLaserY }, { x: carCanvas.width, y: deadlyLaserY }]);
+            if(!cars[i].damaged) {
+                liveCars++;
+            }
+        }
+
+        bestCar = cars.find(
+            c => c.y == Math.min(
+                ...cars.map(c => c.y)
+            )); // fitness function
+
+        
+        deadlyLaserY -= DEADLYLASERSPEED;
+
+        if(liveCars < 1) {
+            await nextGeneration();
+            numGens++;
+            console.log(`Gen${numGens} finished.`);
+        }
+    }
+
+    setTimeout(() => {
+        console.log('Trained for ' + numGens + ' generations.');
+        stopAnimaion = false;
+        animate();
+    }, 100);
 }
 
 function animate(time) {
@@ -143,10 +190,14 @@ function animate(time) {
 
     networkCtx.lineDashOffset = -time / 50;
     Visualizer.drawNetwork(networkCtx, bestCar.brain);
-    requestAnimationFrame(animate);
+
     deadlyLaserY -= DEADLYLASERSPEED;
 
     if(liveCars < 1) {
         nextGeneration();
+    }
+
+    if(!stopAnimaion) {
+        requestAnimationFrame(animate);
     }
 }
